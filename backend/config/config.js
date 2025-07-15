@@ -12,9 +12,7 @@ const connectDB = async () => {
 };
 
 module.exports = {
-  mongoURI:
-    process.env.MONGO_URI ||
-    "mongodb+srv://admin:admin123@cluster0.fcugwoe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+  mongoURI: process.env.MONGO_URI || "",
   jwtSecret: process.env.JWT_SECRET || "your_jwt_secret",
   email: {
     host: process.env.EMAIL_HOST || "smtp.example.com",

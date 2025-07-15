@@ -5,7 +5,7 @@ const { body } = require("express-validator");
 // Validation rules for user registration
 const registerValidationRules = () => {
   return [
-    body("username", "Username is required").notEmpty(),
+    body("userName", "userName is required").notEmpty(),
     body("email", "Please include a valid email").isEmail(),
     body(
       "password",

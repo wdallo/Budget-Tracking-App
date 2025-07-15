@@ -1,35 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+import Layout from "./components/Layout";
+
+/// Pages
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+
+/// API CONTROL
+import {
+  setupAxiosInterceptors,
+  setNavigateFunction,
+} from "./utils/axiosInterceptors";
+import { setApiClientNavigate } from "./utils/apiClient";
+
+function AppWithNavigate() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setupAxiosInterceptors();
+    setNavigateFunction(navigate);
+    setApiClientNavigate(navigate);
+    console.log("🔧 Both global and apiClient interceptors configured");
+  }, [navigate]);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-export default App
+        <Route path="*" element={<>error 404</>} />
+      </Routes>
+    </Layout>
+  );
+}
+function App() {
+  return (
+    <BrowserRouter>
+      <AppWithNavigate />
+    </BrowserRouter>
+  );
+}
+export default App;

@@ -7,7 +7,7 @@ const { validationResult } = require("express-validator");
 const User = require("../models/User");
 
 // Function to register a new user
-async function registerUser(username, email, password) {
+async function registerUser(userName, email, password) {
   try {
     // Check if user already exists
     let user = await User.findOne({ email });
@@ -16,7 +16,7 @@ async function registerUser(username, email, password) {
     }
 
     // Create new user
-    user = new User({ username, email, password });
+    user = new User({ userName, email, password });
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
