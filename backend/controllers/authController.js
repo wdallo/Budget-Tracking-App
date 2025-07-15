@@ -7,7 +7,7 @@ const User = require("../models/User");
 
 // Controller function for user registration
 async function register(req, res) {
-  const { username, email, password } = req.body;
+  const { userName, email, password } = req.body;
 
   try {
     // Check if user already exists
@@ -19,7 +19,7 @@ async function register(req, res) {
     }
 
     // Create new user
-    user = new User({ username, email, password });
+    user = new User({ userName, email, password });
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
@@ -69,7 +69,7 @@ async function login(req, res) {
       payload,
       config.jwtSecret,
       {
-        expiresIn: "1h",
+        expiresIn: "365d",
       },
       (err, token) => {
         if (err) throw err;

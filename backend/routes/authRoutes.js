@@ -11,7 +11,7 @@ const verifyToken = require("../config/middleware");
 router.post(
   "/register",
   [
-    body("username", "Username is required").notEmpty(),
+    body("userName", "userName is required").notEmpty(),
     body("email", "Please include a valid email").isEmail(),
     body(
       "password",
