@@ -61,7 +61,7 @@ async function login(req, res) {
     // Generate JWT token
     const payload = {
       user: {
-        id: user.id,
+        id: user._id,
       },
     };
 
@@ -73,7 +73,7 @@ async function login(req, res) {
       },
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        res.json({ id: user._id, token });
       }
     );
   } catch (err) {
@@ -81,10 +81,11 @@ async function login(req, res) {
     res.status(500).send("Server Error");
   }
 }
+
 async function getUser(req, res) {
   try {
     // Fetch user data based on the user ID from the token
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user._id).select("-password");
     res.json(user);
   } catch (err) {
     console.error(err.message);

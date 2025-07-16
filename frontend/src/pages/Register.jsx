@@ -2,6 +2,8 @@ import { useState } from "react";
 import apiClient from "../utils/apiClient";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import Loading from "../components/Loading";
+
 function Register() {
   const [form, setForm] = useState({
     userName: "",
@@ -10,13 +12,14 @@ function Register() {
     confirmPassword: "",
   });
   const [alert, setAlert] = useState(""); // Add alert state
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     // Frontend validation
     if (
       !form.userName ||
@@ -74,6 +77,8 @@ function Register() {
           : "An error occurred. Please try again.";
 
       setAlert(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -82,6 +87,8 @@ function Register() {
       className="d-flex justify-content-center align-items-center"
       style={{ minHeight: "100vh" }}
     >
+      {" "}
+      {loading && <Loading />}
       <Form
         className="p-4 rounded shadow"
         style={{ minWidth: 350, background: "#fff" }}
