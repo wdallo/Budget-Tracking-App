@@ -3,11 +3,14 @@ import Form from "react-bootstrap/Form";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../utils/apiClient";
+import Loading from "../components/Loading";
 
 function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [values, setValues] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState(""); // Add alert state
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,6 +45,7 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const validationErrors = validate(values);
     if (Object.keys(validationErrors).length) {
       setErrors(validationErrors);
@@ -55,10 +59,24 @@ function Login() {
       } else {
         sessionStorage.setItem("user", JSON.stringify(userData));
       }
+
+      // The backend returns 200
+      if (response.status === 200 && response.data) {
+        navigate("/");
+      } else {
+        setAlert(response.data?.msg || "Login Failled.");
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response && error.response.data && error.response.data.msg
+          ? error.response.data.msg
+          : "An error occurred. Please try again.";
+
+      setAlert(errorMessage);
+    } finally {
       window.dispatchEvent(new Event("authChanged"));
-      navigate("/");
-    } catch (err) {
-      // Optionally handle error here
+      setLoading(false);
+      // navigate("/");
     }
   };
 
@@ -67,6 +85,8 @@ function Login() {
       className="d-flex justify-content-center align-items-center"
       style={{ minHeight: "100vh" }}
     >
+      {loading && <Loading />}
+
       <Form
         className="p-4 rounded shadow"
         style={{ minWidth: 350, background: "#fff" }}
@@ -74,13 +94,18 @@ function Login() {
         onSubmit={handleSubmit}
       >
         <h2 className="mb-4 text-center">Sign In</h2>
+        {alert && (
+          <div className="alert alert-danger w-100 text-center" role="alert">
+            {alert}
+          </div>
+        )}
         <Form.Group className="mb-3" controlId="email">
           <Form.Label>Email address</Form.Label>
           <Form.Control
             name="email"
             type="email"
             placeholder="Enter email"
-            autoComplete="off"
+            autoComplete="on"
             autoFocus
             value={values.email}
             onChange={handleChange}

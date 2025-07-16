@@ -6,7 +6,11 @@ const config = require("./config");
 // Middleware function to verify JWT token
 function verifyToken(req, res, next) {
   // Get token from header
-  const token = req.header("Authorization");
+  let token = req.header("Authorization");
+  // Remove 'Bearer ' prefix if present
+  if (token && token.startsWith("Bearer ")) {
+    token = token.slice(7).trim();
+  }
 
   // Check if token is present
   if (!token) {

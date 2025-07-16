@@ -4,6 +4,13 @@ import Nav from "react-bootstrap/Nav";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import { useAuth } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faHouse,
+  faRightFromBracket,
+  faRightToBracket,
+  faUserPlus,
+} from "@fortawesome/free-solid-svg-icons";
 
 function NavBar() {
   const { isLoggedIn } = useAuth();
@@ -23,7 +30,9 @@ function NavBar() {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link href="/">Home</Nav.Link>
+            <Nav.Link href="/">
+              <FontAwesomeIcon icon={faHouse} /> Home
+            </Nav.Link>
             <Nav.Link href="#link">Link</Nav.Link>
             <NavDropdown title="Dropdown" id="basic-nav-dropdown">
               <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
@@ -39,13 +48,18 @@ function NavBar() {
           </Nav>
           {isLoggedIn ? (
             <Nav className="ms-auto">
-              <Nav.Link href="/profile">Profile</Nav.Link>
-              <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+              <Nav.Link onClick={handleLogout}>
+                <FontAwesomeIcon icon={faRightFromBracket} /> Logout
+              </Nav.Link>
             </Nav>
           ) : (
             <Nav className="ms-auto">
-              <Nav.Link href="/login">Login</Nav.Link>
-              <Nav.Link href="/register">Register</Nav.Link>
+              <Nav.Link href="/login">
+                <FontAwesomeIcon icon={faRightToBracket} /> Login
+              </Nav.Link>
+              <Nav.Link href="/register">
+                <FontAwesomeIcon icon={faUserPlus} /> Register
+              </Nav.Link>
             </Nav>
           )}
         </Navbar.Collapse>

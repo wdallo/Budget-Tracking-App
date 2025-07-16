@@ -7,6 +7,7 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import PageNotFound from "./pages/PageNotFound";
 
 /// API CONTROL
 import {
@@ -14,6 +15,7 @@ import {
   setNavigateFunction,
 } from "./utils/axiosInterceptors";
 import { setApiClientNavigate } from "./utils/apiClient";
+import Budgets from "./pages/Budgets";
 
 function AppWithNavigate() {
   const navigate = useNavigate();
@@ -31,8 +33,8 @@ function AppWithNavigate() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
-        <Route path="*" element={<>error 404</>} />
+        <Route path="/budgets" element={<Budgets />} />
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </Layout>
   );

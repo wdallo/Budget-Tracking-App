@@ -50,11 +50,11 @@ async function authenticateUser(email, password) {
     // Generate JWT token
     const payload = {
       user: {
-        id: user.id,
+        id: user._id,
       },
     };
 
-    const token = jwt.sign(payload, config.jwtSecret, { expiresIn: "1h" });
+    const token = jwt.sign(payload, config.jwtSecret, { expiresIn: "365d" });
     return { token };
   } catch (err) {
     console.error(err.message);
