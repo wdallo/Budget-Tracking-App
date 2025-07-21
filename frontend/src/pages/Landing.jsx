@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import {
   DollarSign,
   TrendingUp,
@@ -11,8 +12,12 @@ import {
   ArrowRight,
   Star,
 } from "lucide-react";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const Landing = () => {
+  const { token, user } = useAuth();
+  useEffect(() => {}, [token, user]);
+
   const features = [
     {
       icon: TrendingUp,
@@ -91,18 +96,31 @@ const Landing = () => {
               </span>
             </div>
             <div className="flex items-center space-x-4">
-              <Link
-                to="/login"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/register"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Get Started
-              </Link>
+              {!token && !user ? (
+                <>
+                  <Link
+                    to="/login"
+                    className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              ) : token && user ? (
+                <Link
+                  to="/dashboard"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <LoadingSpinner text="Loading..." />
+              )}
             </div>
           </div>
         </div>
@@ -122,19 +140,33 @@ const Landing = () => {
               platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/register"
-                className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-              >
-                Start Free Today
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-              <Link
-                to="/login"
-                className="inline-flex items-center px-8 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-              >
-                Sign In
-              </Link>
+              {!token && !user ? (
+                <>
+                  <Link
+                    to="/login"
+                    className="inline-flex items-center px-8 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                  >
+                    Start Free Today
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </>
+              ) : token && user ? (
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                >
+                  Go to Dashboard
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              ) : (
+                <LoadingSpinner text="Loading..." />
+              )}
             </div>
           </div>
         </div>
