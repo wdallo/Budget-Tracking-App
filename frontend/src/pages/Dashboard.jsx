@@ -90,7 +90,7 @@ const Dashboard = () => {
                     Total Income
                   </dt>
                   <dd className="text-lg font-semibold text-gray-900">
-                    ${summary.totalIncome.toFixed(2)}
+                    {summary.totalIncome.toFixed(2)}&euro;
                   </dd>
                 </dl>
               </div>
@@ -110,7 +110,7 @@ const Dashboard = () => {
                     Total Expenses
                   </dt>
                   <dd className="text-lg font-semibold text-gray-900">
-                    ${summary.totalExpenses.toFixed(2)}
+                    {summary.totalExpenses.toFixed(2)}&euro;
                   </dd>
                 </dl>
               </div>
@@ -138,7 +138,7 @@ const Dashboard = () => {
                       summary.netIncome >= 0 ? "text-green-600" : "text-red-600"
                     }`}
                   >
-                    ${summary.netIncome.toFixed(2)}
+                    {summary.netIncome.toFixed(2)}&euro;
                   </dd>
                 </dl>
               </div>
@@ -217,8 +217,8 @@ const Dashboard = () => {
                         : "text-red-600"
                     }`}
                   >
-                    {transaction.type === "income" ? "+" : "-"}$
-                    {parseFloat(transaction.amount).toFixed(2)}
+                    {transaction.type === "income" ? "+" : "-"}
+                    {parseFloat(transaction.amount).toFixed(2)}&euro;
                   </div>
                 </div>
               </li>

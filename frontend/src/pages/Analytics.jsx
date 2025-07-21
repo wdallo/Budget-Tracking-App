@@ -133,10 +133,10 @@ const Analytics = () => {
                     Total Income
                   </dt>
                   <dd className="text-lg font-semibold text-gray-900">
-                    $
                     {typeof summary.totalIncome === "number"
                       ? summary.totalIncome.toFixed(2)
                       : "0.00"}
+                    &euro;
                   </dd>
                 </dl>
               </div>
@@ -156,10 +156,10 @@ const Analytics = () => {
                     Total Expenses
                   </dt>
                   <dd className="text-lg font-semibold text-gray-900">
-                    $
                     {typeof summary.totalExpenses === "number"
                       ? summary.totalExpenses.toFixed(2)
                       : "0.00"}
+                    &euro;
                   </dd>
                 </dl>
               </div>
@@ -190,10 +190,10 @@ const Analytics = () => {
                         : "text-red-600"
                     }`}
                   >
-                    $
                     {typeof summary.netIncome === "number"
                       ? summary.netIncome.toFixed(2)
                       : "0.00"}
+                    &euro;
                   </dd>
                 </dl>
               </div>
@@ -257,7 +257,7 @@ const Analytics = () => {
                       />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                  <Tooltip formatter={(value) => `${value.toFixed(2)}€`} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -303,7 +303,7 @@ const Analytics = () => {
                       />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                  <Tooltip formatter={(value) => `${value.toFixed(2)}€`} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -345,10 +345,10 @@ const Analytics = () => {
                     </div>
                   </div>
                   <div className="text-sm text-gray-900">
-                    $
                     {typeof category.amount === "number"
                       ? category.amount.toFixed(2)
                       : "0.00"}
+                    &euro;
                   </div>
                 </div>
               </li>

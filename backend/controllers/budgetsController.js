@@ -21,4 +21,44 @@ const createBudget = async (req, res) => {
   }
 };
 
-module.exports = { getBudgets, createBudget };
+const deleteBudget = async (req, res) => {
+  try {
+    // Ensure the budget belongs to the authenticated user
+    const budget = await Budget.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    });
+    if (!budget) {
+      return res
+        .status(404)
+        .json({ error: "Budget not found or not authorized" });
+    }
+    await budget.deleteOne();
+    res.json({ message: "Budget deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const updateBudget = async (req, res) => {
+  try {
+    // Find the budget and ensure it belongs to the user
+    const budget = await Budget.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    });
+    if (!budget) {
+      return res
+        .status(404)
+        .json({ error: "Budget not found or not authorized" });
+    }
+    // Update only if user owns the budget
+    Object.assign(budget, req.body);
+    await budget.save();
+    res.json(budget);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+module.exports = { getBudgets, createBudget, updateBudget, deleteBudget };

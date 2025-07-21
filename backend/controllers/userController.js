@@ -6,7 +6,17 @@ const jwt = require("jsonwebtoken");
 const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
-    const existingUser = await User.findOne({ email });
+    const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    if (
+      typeof email !== "string" ||
+      typeof password !== "string" ||
+      !email.trim() ||
+      !password.trim() ||
+      !emailRegex.test(email.trim())
+    ) {
+      return res.status(400).json({ error: "Invalid input" });
+    }
+    const existingUser = await User.findOne({ email: email.trim() });
     if (existingUser) {
       return res.status(400).json({ error: "User already exists" });
     }
@@ -14,15 +24,19 @@ const register = async (req, res) => {
     const user = new User({
       firstName,
       lastName,
-      email,
+      email: email.trim(),
       password: hashedPassword,
+      role: "user", // default role
     });
     await user.save();
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) throw new Error("JWT_SECRET not set");
     const token = jwt.sign(
-      { userId: user._id, email: user.email },
-      process.env.JWT_SECRET || "fallback-secret",
+      { userId: user._id, email: user.email, role: user.role },
+      jwtSecret,
       { expiresIn: "365d" }
     );
+
     res.status(201).json({
       token,
       user: {
@@ -30,6 +44,7 @@ const register = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -37,12 +52,22 @@ const register = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
-
 // Login user
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    // Validate input to prevent injection
+    const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    if (
+      typeof email !== "string" ||
+      typeof password !== "string" ||
+      !email.trim() ||
+      !password.trim() ||
+      !emailRegex.test(email.trim())
+    ) {
+      return res.status(400).json({ error: "Invalid input" });
+    }
+    const user = await User.findOne({ email: email.trim() });
     if (!user) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
@@ -50,14 +75,22 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) throw new Error("JWT_SECRET not set");
     const token = jwt.sign(
-      { userId: user._id, email: user.email },
-      process.env.JWT_SECRET || "fallback-secret",
+      { userId: user._id, email: user.email, role: user.role },
+      jwtSecret,
       { expiresIn: "365d" }
     );
     res.json({
       token,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
     res.status(500).json({ error: "Server error" });
@@ -70,10 +103,9 @@ const verify = async (req, res) => {
 
   const token = authHeader.split(" ")[1];
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "fallback-secret"
-    );
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) throw new Error("JWT_SECRET not set");
+    const decoded = jwt.verify(token, jwtSecret);
     // Fetch user from DB for up-to-date info
     const user = await User.findById(decoded.userId).select("-password");
     if (!user)
@@ -85,6 +117,7 @@ const verify = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (err) {

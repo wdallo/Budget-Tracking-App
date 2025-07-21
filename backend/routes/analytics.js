@@ -1,5 +1,5 @@
 const express = require("express");
-const requireAuth = require("../middleware/authMiddleware.js");
+const { requireAuth } = require("../middleware/authMiddleware.js");
 const {
   getSummary,
   getSpendingByCategory,

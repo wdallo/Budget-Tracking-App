@@ -38,5 +38,25 @@ const deleteTransaction = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-module.exports = { getTransactions, createTransaction, deleteTransaction };
+// Update transaction by ID (only if it belongs to the user)
+const updateTransaction = async (req, res) => {
+  try {
+    const transaction = await Transaction.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!transaction) {
+      return res.status(404).json({ error: "Transaction not found" });
+    }
+    res.json(transaction);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+module.exports = {
+  getTransactions,
+  createTransaction,
+  deleteTransaction,
+  updateTransaction,
+};

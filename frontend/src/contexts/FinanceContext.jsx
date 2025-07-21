@@ -72,6 +72,19 @@ export const FinanceProvider = ({ children }) => {
     }
   };
 
+  const deleteBudget = async (id) => {
+    if (!token) return;
+    try {
+      await apiCall(`/budgets/${id}`, {
+        method: "DELETE",
+      });
+      setBudgets((prev) => prev.filter((b) => b.id !== id));
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
   const createTransaction = async (transactionData) => {
     try {
       await apiCall("/transactions", {
@@ -122,6 +135,18 @@ export const FinanceProvider = ({ children }) => {
       return { success: false, error: error.message };
     }
   };
+  const deleteCategory = async (id) => {
+    if (!token) return { success: false, error: "No token provided" };
+    try {
+      await apiCall(`/categories/${id}`, {
+        method: "DELETE",
+      });
+      setCategories((prev) => prev.filter((c) => c.id !== id));
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
 
   const createBudget = async (budgetData) => {
     try {
@@ -130,6 +155,19 @@ export const FinanceProvider = ({ children }) => {
         body: JSON.stringify(budgetData),
       });
       setBudgets((prev) => [...prev, data]);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
+  const updateBudget = async (id, budgetData) => {
+    try {
+      const data = await apiCall(`/budgets/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(budgetData),
+      });
+      setBudgets((prev) => prev.map((b) => (b.id === id ? data : b)));
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };
@@ -154,7 +192,12 @@ export const FinanceProvider = ({ children }) => {
     updateTransaction,
     deleteTransaction,
     createCategory,
+    deleteCategory,
+    setCategories, // Expose for optimistic UI
     createBudget,
+    deleteBudget,
+    updateBudget,
+    setBudgets, // Expose for optimistic UI
     fetchTransactions,
     fetchCategories,
     fetchBudgets,
