@@ -47,7 +47,6 @@ const getIncomeByCategory = async (req, res) => {
     }));
     res.json(result);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: error.message, stack: error.stack });
   }
 };
@@ -68,7 +67,6 @@ const getSummary = async (req, res) => {
       user: userId,
       date: { $gte: sinceDate },
     });
-    console.log("RAW transactions:", transactions); // DEBUG
 
     let totalIncome = 0;
     let totalExpenses = 0;

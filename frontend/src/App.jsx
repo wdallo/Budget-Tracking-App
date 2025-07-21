@@ -12,6 +12,7 @@ import Categories from "./pages/Categories";
 import Budgets from "./pages/Budgets";
 import Analytics from "./pages/Analytics";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PageNotFound from "./pages/PageNotFound";
 
 function App() {
   return (
@@ -75,6 +76,8 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route path="*" element={<PageNotFound />} />
             </Routes>
           </div>
         </BrowserRouter>

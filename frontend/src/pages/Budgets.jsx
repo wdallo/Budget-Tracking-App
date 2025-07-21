@@ -1,12 +1,24 @@
 import React, { useState } from "react";
+import PopAlert from "../components/PopAlert";
 import { useFinance } from "../contexts/FinanceContext";
-import { Plus, Target, AlertCircle } from "lucide-react";
+import { Plus, Target, AlertCircle, Trash2, Edit2 } from "lucide-react";
 import { format, isAfter, isBefore, parseISO } from "date-fns";
 
 const Budgets = () => {
-  const { budgets, categories, createBudget, loading, transactions } =
-    useFinance();
+  const {
+    fetchBudgets,
+    budgets,
+    setBudgets,
+    categories,
+    createBudget,
+    updateBudget,
+    loading,
+    transactions,
+    deleteBudget,
+  } = useFinance();
+
   const [showModal, setShowModal] = useState(false);
+  const [editingBudget, setEditingBudget] = useState(null);
   const [formData, setFormData] = useState({
     category_id: "",
     amount: "",
@@ -14,6 +26,34 @@ const Budgets = () => {
     start_date: new Date().toISOString().split("T")[0],
     end_date: "",
   });
+
+  // PopAlert state for delete confirmation
+  const [popAlertOpen, setPopAlertOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [optimisticPrev, setOptimisticPrev] = useState(null);
+
+  const handleDelete = async (id) => {
+    setPendingDeleteId(id);
+    setPopAlertOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (pendingDeleteId) {
+      // Optimistically remove from UI
+      const prevBudgets = [...budgets];
+      setOptimisticPrev(prevBudgets);
+      const newBudgets = budgets.filter((t) => t._id !== pendingDeleteId);
+      setBudgets(newBudgets);
+      setPopAlertOpen(false);
+      try {
+        await deleteBudget(pendingDeleteId);
+      } catch {
+        setBudgets(prevBudgets);
+        alert("Failed to delete budget. Please refresh.");
+      }
+      setPendingDeleteId(null);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,11 +69,13 @@ const Budgets = () => {
       startDate: formData.start_date,
       endDate: formData.end_date,
     };
-
-    const result = await createBudget(budgetPayload);
+    const result = editingBudget
+      ? await updateBudget(editingBudget._id, budgetPayload)
+      : await createBudget(budgetPayload);
 
     if (result.success) {
       setShowModal(false);
+      setEditingBudget(null);
       setFormData({
         category_id: "",
         amount: "",
@@ -41,7 +83,29 @@ const Budgets = () => {
         start_date: new Date().toISOString().split("T")[0],
         end_date: "",
       });
+
+      if (editingBudget) {
+        await fetchBudgets();
+      }
     }
+  };
+
+  const handleEdit = (budget) => {
+    setEditingBudget(budget);
+    setFormData({
+      amount: budget.amount ?? "",
+      description: budget.description ?? "",
+      category_id: budget.category_id ?? "",
+      date: budget.date ?? "",
+      period: budget.period ?? "monthly",
+      start_date: budget.startDate
+        ? new Date(budget.startDate).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
+      end_date: budget.endDate
+        ? new Date(budget.endDate).toISOString().split("T")[0]
+        : "",
+    });
+    setShowModal(true);
   };
 
   if (loading) {
@@ -66,7 +130,10 @@ const Budgets = () => {
         </div>
         <div className="mt-4 flex md:mt-0 md:ml-4">
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              setEditingBudget(null);
+              setShowModal(true);
+            }}
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <Plus className="-ml-1 mr-2 h-5 w-5" />
@@ -123,7 +190,7 @@ const Budgets = () => {
                     </div>
                     <div className="ml-3">
                       <div className="text-sm font-medium text-gray-900">
-                        {budget.categories?.name}
+                        {budget.name}
                       </div>
                       <div className="text-sm text-gray-500">
                         {budget.period}
@@ -132,9 +199,19 @@ const Budgets = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-medium text-gray-900">
-                      ${parseFloat(budget.amount).toFixed(2)}
+                      <button
+                        onClick={() => handleDelete(budget._id)}
+                        className="p-1 text-gray-400 hover:text-red-500"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleEdit(budget)}
+                        className="p-1 text-gray-400 hover:text-gray-500"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
                     </div>
-                    <div className="text-xs text-gray-500">Budget</div>
                   </div>
                 </div>
                 <div className="mt-4">
@@ -163,13 +240,13 @@ const Budgets = () => {
                     <span>
                       Spent:{" "}
                       <span className="font-semibold text-gray-700">
-                        ${spent.toFixed(2)}
+                        {spent.toFixed(2)}&euro;
                       </span>
                     </span>
                     <span>
                       Budget:{" "}
                       <span className="font-semibold text-gray-700">
-                        ${parseFloat(budget.amount).toFixed(2)}
+                        {parseFloat(budget.amount).toFixed(2)}&euro;
                       </span>
                     </span>
                   </div>
@@ -202,13 +279,28 @@ const Budgets = () => {
           </div>
         </div>
       )}
-
+      {/* PopAlert for Delete Confirmation */}
+      <PopAlert
+        open={popAlertOpen}
+        onCancel={() => {
+          setPopAlertOpen(false);
+          setPendingDeleteId(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Delete Budget"
+        description="Are you sure you want to delete this budget? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div
+          style={{ marginTop: "-120px" }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+        >
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Create New Budget
+              {editingBudget ? "Edit Budget" : "Create New Budget"}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -312,7 +404,7 @@ const Budgets = () => {
                   type="submit"
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
                 >
-                  Create
+                  {editingBudget ? "Update" : "Create"}
                 </button>
               </div>
             </form>

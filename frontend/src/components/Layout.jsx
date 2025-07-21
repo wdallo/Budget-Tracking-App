@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { 
-  Home, 
-  CreditCard, 
-  Tag, 
-  Target, 
-  TrendingUp, 
-  Menu, 
-  X, 
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import {
+  Home,
+  CreditCard,
+  Tag,
+  Target,
+  TrendingUp,
+  Menu,
+  X,
   LogOut,
-  DollarSign
-} from 'lucide-react';
+  DollarSign,
+  HardDrive,
+} from "lucide-react";
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
@@ -19,13 +20,15 @@ const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Transactions', href: '/transactions', icon: CreditCard },
-    { name: 'Categories', href: '/categories', icon: Tag },
-    { name: 'Budgets', href: '/budgets', icon: Target },
-    { name: 'Analytics', href: '/analytics', icon: TrendingUp },
+    { name: "Dashboard", href: "/dashboard", icon: Home },
+    { name: "Transactions", href: "/transactions", icon: CreditCard },
+    { name: "Categories", href: "/categories", icon: Tag },
+    { name: "Budgets", href: "/budgets", icon: Target },
+    { name: "Analytics", href: "/analytics", icon: TrendingUp },
+    ...(user && user.role === "admin"
+      ? [{ name: "Admin Dashboard", href: "/admin-dashboard", icon: HardDrive }]
+      : []),
   ];
-
   const handleLogout = () => {
     logout();
   };
@@ -33,8 +36,15 @@ const Layout = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile sidebar */}
-      <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)}></div>
+      <div
+        className={`fixed inset-0 z-50 lg:hidden ${
+          sidebarOpen ? "block" : "hidden"
+        }`}
+      >
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-75"
+          onClick={() => setSidebarOpen(false)}
+        ></div>
         <div className="relative flex w-full max-w-xs flex-col bg-white">
           <div className="absolute top-0 right-0 -mr-12 pt-2">
             <button
@@ -47,7 +57,9 @@ const Layout = ({ children }) => {
           <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
             <div className="flex-shrink-0 flex items-center px-4">
               <DollarSign className="h-8 w-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">FinanceApp</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">
+                FinanceApp
+              </span>
             </div>
             <nav className="mt-5 px-2 space-y-1">
               {navigation.map((item) => {
@@ -58,8 +70,8 @@ const Layout = ({ children }) => {
                     to={item.href}
                     className={`${
                       location.pathname === item.href
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? "bg-blue-100 text-blue-700"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     } group flex items-center px-2 py-2 text-base font-medium rounded-md`}
                     onClick={() => setSidebarOpen(false)}
                   >
@@ -79,7 +91,9 @@ const Layout = ({ children }) => {
           <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
             <div className="flex items-center flex-shrink-0 px-4">
               <DollarSign className="h-8 w-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">FinanceApp</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">
+                FinanceApp
+              </span>
             </div>
             <nav className="mt-5 flex-1 px-2 space-y-1">
               {navigation.map((item) => {
@@ -90,8 +104,8 @@ const Layout = ({ children }) => {
                     to={item.href}
                     className={`${
                       location.pathname === item.href
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? "bg-blue-100 text-blue-700"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     } group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150`}
                   >
                     <Icon className="mr-3 h-5 w-5" />
@@ -135,7 +149,9 @@ const Layout = ({ children }) => {
               </button>
               <div className="ml-2 flex items-center">
                 <DollarSign className="h-6 w-6 text-blue-600" />
-                <span className="ml-2 text-lg font-bold text-gray-900">FinanceApp</span>
+                <span className="ml-2 text-lg font-bold text-gray-900">
+                  FinanceApp
+                </span>
               </div>
             </div>
             <button
@@ -148,9 +164,7 @@ const Layout = ({ children }) => {
         </div>
 
         <main className="flex-1 py-6">
-          <div className="px-4 sm:px-6 lg:px-8">
-            {children}
-          </div>
+          <div className="px-4 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>
     </div>

@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import PopAlert from "../components/PopAlert";
 import { useFinance } from "../contexts/FinanceContext";
-import { Plus, Tag } from "lucide-react";
+import { Plus, Tag, Trash2 } from "lucide-react";
 
 const Categories = () => {
-  const { categories, createCategory, loading } = useFinance();
+  const { categories, setCategories, createCategory, deleteCategory, loading } =
+    useFinance();
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -38,6 +40,34 @@ const Categories = () => {
     "#EC4899",
     "#6B7280",
   ];
+  // PopAlert state for delete confirmation
+  const [popAlertOpen, setPopAlertOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [optimisticPrev, setOptimisticPrev] = useState(null);
+  const handleDelete = (id) => {
+    setPendingDeleteId(id);
+    setPopAlertOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (pendingDeleteId) {
+      // Optimistically remove from UI
+      const prevCategory = [...categories];
+      setOptimisticPrev(prevCategory);
+      const newCategory = categories.filter(
+        (cat) => cat._id !== pendingDeleteId
+      );
+      setCategories(newCategory);
+      setPopAlertOpen(false);
+      try {
+        await deleteCategory(pendingDeleteId);
+      } catch {
+        setCategories(prevCategory);
+        alert("Failed to delete category. Please refresh.");
+      }
+      setPendingDeleteId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -90,6 +120,12 @@ const Categories = () => {
                     {category.name}
                   </div>
                 </div>
+                <button
+                  onClick={() => handleDelete(category._id)}
+                  className="p-1 text-gray-400 hover:text-red-500"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
             </div>
           </div>
@@ -116,10 +152,25 @@ const Categories = () => {
           </div>
         </div>
       )}
-
+      {/* PopAlert for Delete Confirmation */}
+      <PopAlert
+        open={popAlertOpen}
+        onCancel={() => {
+          setPopAlertOpen(false);
+          setPendingDeleteId(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Delete Category"
+        description="Are you sure you want to delete this Category? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div
+          style={{ marginTop: "-50px" }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+        >
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               Add New Category

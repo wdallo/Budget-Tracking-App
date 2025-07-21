@@ -7,6 +7,7 @@ import { format } from "date-fns";
 const Transactions = () => {
   const {
     transactions,
+    fetchTransactions,
     setTransactions,
     categories,
     createTransaction,
@@ -39,7 +40,7 @@ const Transactions = () => {
     };
 
     const result = editingTransaction
-      ? await updateTransaction(editingTransaction.id, transactionPayload)
+      ? await updateTransaction(editingTransaction._id, transactionPayload)
       : await createTransaction(transactionPayload);
 
     if (result.success) {
@@ -52,6 +53,7 @@ const Transactions = () => {
         date: new Date().toISOString().split("T")[0],
         type: "expense",
       });
+      fetchTransactions();
     }
   };
 
@@ -61,9 +63,12 @@ const Transactions = () => {
       amount: transaction.amount,
       description: transaction.description,
       category_id: transaction.category_id,
-      date: transaction.date,
+      date: transaction.date
+        ? new Date(transaction.date).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
       type: transaction.type,
     });
+
     setShowModal(true);
   };
 
@@ -217,7 +222,7 @@ const Transactions = () => {
                           : "text-red-600"
                       }`}
                     >
-                      ${parseFloat(transaction.amount).toFixed(2)}
+                      {parseFloat(transaction.amount).toFixed(2)}&euro;
                     </div>
                     <button
                       onClick={() => handleEdit(transaction)}
@@ -255,7 +260,10 @@ const Transactions = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div
+          style={{ marginTop: "-120px" }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+        >
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               {editingTransaction ? "Edit Transaction" : "Add New Transaction"}
