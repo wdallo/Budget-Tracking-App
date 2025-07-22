@@ -119,7 +119,8 @@ const Budgets = () => {
     setFormData({
       amount: budget.amount ?? "",
       description: budget.description ?? "",
-      category_id: budget.category_id ?? "",
+      category_id:
+        budget.category?._id || budget.category_id || budget.category || "",
       date: budget.date ?? "",
       period: budget.period ?? "monthly",
       start_date: budget.startDate

@@ -72,7 +72,7 @@ const Transactions = () => {
     setFormData({
       amount: transaction.amount,
       description: transaction.description,
-      category_id: transaction.category_id,
+      category_id: transaction.category?._id || transaction.category_id || "",
       date: transaction.date
         ? new Date(transaction.date).toISOString().split("T")[0]
         : new Date().toISOString().split("T")[0],
