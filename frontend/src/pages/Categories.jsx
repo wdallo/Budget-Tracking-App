@@ -2,22 +2,25 @@ import React, { useState } from "react";
 import PopAlert from "../components/PopAlert";
 import { useFinance } from "../contexts/FinanceContext";
 import { Plus, Tag, Trash2 } from "lucide-react";
+import { SuccessAlert, ErrorAlert } from "../components/Alerts";
 
 const Categories = () => {
   const { categories, setCategories, createCategory, deleteCategory, loading } =
     useFinance();
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     color: "#3B82F6",
     icon: "tag",
   });
-
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const result = await createCategory(formData);
-
     if (result.success) {
       setShowModal(false);
       setFormData({
@@ -25,6 +28,11 @@ const Categories = () => {
         color: "#3B82F6",
         icon: "tag",
       });
+      setSuccess(true);
+      setError("");
+    } else {
+      setError(result.error || "Failed to create category.");
+      setSuccess(false);
     }
   };
 
@@ -60,10 +68,21 @@ const Categories = () => {
       setCategories(newCategory);
       setPopAlertOpen(false);
       try {
-        await deleteCategory(pendingDeleteId);
+        const result = await deleteCategory(pendingDeleteId);
+        if (result && result.success) {
+          setDeleteSuccess(true);
+          setDeleteError("");
+        } else {
+          setCategories(prevCategory);
+          setDeleteError(
+            result?.error || "Failed to delete category. Please refresh."
+          );
+          setDeleteSuccess(false);
+        }
       } catch {
         setCategories(prevCategory);
-        alert("Failed to delete category. Please refresh.");
+        setDeleteError("Failed to delete category. Please refresh.");
+        setDeleteSuccess(false);
       }
       setPendingDeleteId(null);
     }
@@ -79,6 +98,22 @@ const Categories = () => {
 
   return (
     <div className="space-y-6">
+      {success && (
+        <SuccessAlert
+          message="Category created successfully!"
+          onClose={() => setSuccess(false)}
+        />
+      )}
+      {error && <ErrorAlert message={error} onClose={() => setError("")} />}
+      {deleteSuccess && (
+        <SuccessAlert
+          message="Category deleted successfully!"
+          onClose={() => setDeleteSuccess(false)}
+        />
+      )}
+      {deleteError && (
+        <ErrorAlert message={deleteError} onClose={() => setDeleteError("")} />
+      )}
       {/* Header */}
       <div className="md:flex md:items-center md:justify-between">
         <div className="flex-1 min-w-0">

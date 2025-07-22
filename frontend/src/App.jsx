@@ -20,14 +20,15 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AccessDenied from "./pages/admin/AccessDenied";
 import { AdminProvider } from "./contexts/AdminContext";
 import AdminUsers from "./pages/admin/Users";
+import BannedPage from "./pages/admin/BannedPage";
 
 function App() {
   return (
-    <AuthProvider>
-      <FinanceProvider>
-        <BrowserRouter
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
+    <BrowserRouter
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
+      <AuthProvider>
+        <FinanceProvider>
           <div className="min-h-screen bg-gray-50">
             <Routes>
               <Route path="/" element={<Landing />} />
@@ -114,11 +115,12 @@ function App() {
 
               {/* Error Handling */}
               <Route path="*" element={<PageNotFound />} />
+              <Route path="/banned" element={<BannedPage />} />
             </Routes>
           </div>
-        </BrowserRouter>
-      </FinanceProvider>
-    </AuthProvider>
+        </FinanceProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

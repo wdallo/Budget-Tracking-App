@@ -102,13 +102,20 @@ export const AdminProvider = ({ children }) => {
       return { success: false, error: error.message };
     }
   };
-
-  //   useEffect(() => {
-  //     if (token && isAdmin) {
-  //       fetchUsers();
-  //     }
-  //   }, [token, isAdmin]);
-
+  const banUser = async (id) => {
+    if (!isAdmin) return { success: false, error: "Not authorized" };
+    try {
+      await apiCall(`/auth/admin/users/ban/${id}`, {
+        method: "PUT",
+      });
+      setUsers((prev) =>
+        prev.map((u) => (u.id === id ? { ...u, banned: true } : u))
+      );
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
   const value = {
     users,
     setUsers,
@@ -118,6 +125,7 @@ export const AdminProvider = ({ children }) => {
     createUser,
     updateUser,
     deleteUser,
+    banUser,
     isAdmin,
     admin,
   };

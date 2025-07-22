@@ -2,10 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useAdmin } from "../../contexts/AdminContext";
 import PopAlert from "../../components/PopAlert";
 import { Search, Edit2, Trash2 } from "lucide-react";
-
+import { SuccessAlert, ErrorAlert } from "../../components/Alerts";
 const AdminUsers = () => {
-  const { users, fetchUsers, setUsers, updateUser, deleteUser, loading } =
-    useAdmin();
+  const {
+    users,
+    fetchUsers,
+    setUsers,
+    updateUser,
+    deleteUser,
+    banUser,
+    loading,
+  } = useAdmin();
 
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -17,6 +24,23 @@ const AdminUsers = () => {
     role: "user",
   });
 
+  // Add success and error state
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  // Ban user handler
+  const handleBan = async (user) => {
+    const result = await banUser(user._id, { ...user, status: "banned" });
+    if (result.success) {
+      setSuccess(true);
+      setError("");
+      fetchUsers();
+    } else {
+      setError(result.message || "Failed to ban user.");
+      setSuccess(false);
+    }
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userPayload = {
@@ -24,6 +48,7 @@ const AdminUsers = () => {
       lastName: formData.lastName,
       email: formData.email,
       role: formData.role,
+      status: formData.status || "active",
     };
     const result = await updateUser(editingUser._id, userPayload);
 
@@ -32,6 +57,11 @@ const AdminUsers = () => {
       setEditingUser(null);
       setFormData({ firstName: "", lastName: "", email: "", role: "user" });
       fetchUsers();
+      setSuccess(true);
+      setError("");
+    } else {
+      setError(result.message || "Failed to update user.");
+      setSuccess(false);
     }
   };
 
@@ -42,6 +72,7 @@ const AdminUsers = () => {
       lastName: user.lastName,
       email: user.email,
       role: user.role,
+      status: user.status || "active",
     });
     setShowModal(true);
   };
@@ -61,10 +92,21 @@ const AdminUsers = () => {
       setUsers(newUsers);
       setPopAlertOpen(false);
       try {
-        await deleteUser(pendingDeleteId);
+        const result = await deleteUser(pendingDeleteId);
+        if (result && result.success) {
+          setDeleteSuccess(true);
+          setDeleteError("");
+        } else {
+          setUsers(prevUsers);
+          setDeleteError(
+            result?.message || "Failed to delete user. Please refresh."
+          );
+          setDeleteSuccess(false);
+        }
       } catch {
         setUsers(prevUsers);
-        alert("Failed to delete user. Please refresh.");
+        setDeleteError("Failed to delete user. Please refresh.");
+        setDeleteSuccess(false);
       }
       setPendingDeleteId(null);
     }
@@ -92,6 +134,24 @@ const AdminUsers = () => {
 
   return (
     <div className="space-y-6">
+      {/* Success and Error Alerts */}
+      {success && (
+        <SuccessAlert
+          message="User updated successfully!"
+          onClose={() => setSuccess(false)}
+        />
+      )}
+      {error && <ErrorAlert message={error} onClose={() => setError("")} />}
+      {deleteSuccess && (
+        <SuccessAlert
+          message="User deleted successfully!"
+          onClose={() => setDeleteSuccess(false)}
+        />
+      )}
+      {deleteError && (
+        <ErrorAlert message={deleteError} onClose={() => setDeleteError("")} />
+      )}
+
       <div className="md:flex md:items-center md:justify-between">
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
@@ -147,6 +207,11 @@ const AdminUsers = () => {
                           {user.role}
                         </span>
                       )}
+                      {user.status === "banned" && (
+                        <span className="ml-2 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-700/10 ring-inset">
+                          banned
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -162,6 +227,23 @@ const AdminUsers = () => {
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
+                    {user.status === "banned" ? (
+                      <button
+                        onClick={() => handleBan({ ...user, status: "active" })}
+                        className="p-1 text-gray-400 hover:text-green-600"
+                        title="Unban user"
+                      >
+                        <span className="text-xs font-bold">Unban</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleBan(user)}
+                        className="p-1 text-gray-400 hover:text-yellow-600"
+                        title="Ban user"
+                      >
+                        <span className="text-xs font-bold">Ban</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </li>
@@ -251,6 +333,22 @@ const AdminUsers = () => {
                 >
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Status
+                </label>
+                <select
+                  value={formData.status || "active"}
+                  onChange={(e) =>
+                    setFormData({ ...formData, status: e.target.value })
+                  }
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                >
+                  <option value="active">Active</option>
+                  <option value="banned">Banned</option>
                 </select>
               </div>
               <div className="flex justify-end space-x-3 pt-4">

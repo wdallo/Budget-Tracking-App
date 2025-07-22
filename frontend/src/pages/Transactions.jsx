@@ -3,6 +3,7 @@ import PopAlert from "../components/PopAlert";
 import { useFinance } from "../contexts/FinanceContext";
 import { Plus, Edit2, Trash2, Search, Filter } from "lucide-react";
 import { format } from "date-fns";
+import { SuccessAlert, ErrorAlert } from "../components/Alerts";
 
 const Transactions = () => {
   const {
@@ -26,6 +27,10 @@ const Transactions = () => {
     date: new Date().toISOString().split("T")[0],
     type: "expense",
   });
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,7 +58,12 @@ const Transactions = () => {
         date: new Date().toISOString().split("T")[0],
         type: "expense",
       });
+      setSuccess(editingTransaction ? "update" : "create");
+      setError("");
       fetchTransactions();
+    } else {
+      setError(result.error || "Failed to save transaction.");
+      setSuccess(false);
     }
   };
 
@@ -93,10 +103,21 @@ const Transactions = () => {
       setTransactions(newTransactions);
       setPopAlertOpen(false);
       try {
-        await deleteTransaction(pendingDeleteId);
+        const result = await deleteTransaction(pendingDeleteId);
+        if (result && result.success) {
+          setDeleteSuccess(true);
+          setDeleteError("");
+        } else {
+          setTransactions(prevTransactions);
+          setDeleteError(
+            result?.error || "Failed to delete transaction. Please refresh."
+          );
+          setDeleteSuccess(false);
+        }
       } catch {
         setTransactions(prevTransactions);
-        alert("Failed to delete transaction. Please refresh.");
+        setDeleteError("Failed to delete transaction. Please refresh.");
+        setDeleteSuccess(false);
       }
       setPendingDeleteId(null);
     }
@@ -121,6 +142,28 @@ const Transactions = () => {
 
   return (
     <div className="space-y-6">
+      {success === "create" && (
+        <SuccessAlert
+          message="Transaction created successfully!"
+          onClose={() => setSuccess(false)}
+        />
+      )}
+      {success === "update" && (
+        <SuccessAlert
+          message="Transaction updated successfully!"
+          onClose={() => setSuccess(false)}
+        />
+      )}
+      {error && <ErrorAlert message={error} onClose={() => setError("")} />}
+      {deleteSuccess && (
+        <SuccessAlert
+          message="Transaction deleted successfully!"
+          onClose={() => setDeleteSuccess(false)}
+        />
+      )}
+      {deleteError && (
+        <ErrorAlert message={deleteError} onClose={() => setDeleteError("")} />
+      )}
       {/* Header */}
       <div className="md:flex md:items-center md:justify-between">
         <div className="flex-1 min-w-0">

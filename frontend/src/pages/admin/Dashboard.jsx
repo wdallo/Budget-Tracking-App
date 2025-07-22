@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Users, FileText, Settings, TrendingUp, Plus } from "lucide-react";
 import { useAdmin } from "../../contexts/AdminContext";
+import { Link } from "react-router-dom";
 
 const AdminDashboard = () => {
   const { users, isAdmin, admin, fetchUserCount } = useAdmin();
@@ -80,8 +81,8 @@ const AdminDashboard = () => {
         </div>
         <div className="px-4 py-5 sm:p-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <a
-              href="/admin/users"
+            <Link
+              to="/admin/users"
               className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border hover:shadow-md transition-shadow"
             >
               <span className="rounded-lg inline-flex p-3 bg-blue-50 text-blue-600 ring-4 ring-white">
@@ -95,9 +96,9 @@ const AdminDashboard = () => {
                   Add, edit, or remove users
                 </p>
               </div>
-            </a>
-            <a
-              href="/admin/reports"
+            </Link>
+            <Link
+              to="/admin/reports"
               className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-green-500 rounded-lg border hover:shadow-md transition-shadow"
             >
               <span className="rounded-lg inline-flex p-3 bg-green-50 text-green-600 ring-4 ring-white">
@@ -111,9 +112,9 @@ const AdminDashboard = () => {
                   Access system analytics
                 </p>
               </div>
-            </a>
-            <a
-              href="/admin/settings"
+            </Link>
+            <Link
+              to="/admin/settings"
               className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-gray-500 rounded-lg border hover:shadow-md transition-shadow"
             >
               <span className="rounded-lg inline-flex p-3 bg-gray-50 text-gray-600 ring-4 ring-white">
@@ -127,7 +128,7 @@ const AdminDashboard = () => {
                   Update admin preferences
                 </p>
               </div>
-            </a>
+            </Link>
           </div>
         </div>
       </div>
