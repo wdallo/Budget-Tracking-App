@@ -2,6 +2,32 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+/// Get users
+const getUsers = async (req, res) => {
+  try {
+    // Only admin can access
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    const users = await User.find().select("-password");
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+/// Count users
+const getUserCount = async (req, res) => {
+  try {
+    // Only admin can access
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    const count = await User.countDocuments();
+    res.json({ count });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
 // Register a new user
 const register = async (req, res) => {
   try {
@@ -125,4 +151,4 @@ const verify = async (req, res) => {
   }
 };
 
-module.exports = { register, login, verify };
+module.exports = { getUsers, getUserCount, register, login, verify };

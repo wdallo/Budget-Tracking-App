@@ -26,7 +26,7 @@ const Layout = ({ children }) => {
     { name: "Budgets", href: "/budgets", icon: Target },
     { name: "Analytics", href: "/analytics", icon: TrendingUp },
     ...(user && user.role === "admin"
-      ? [{ name: "Admin Dashboard", href: "/admin-dashboard", icon: HardDrive }]
+      ? [{ name: "Admin Dashboard", href: "/admin/dashboard", icon: HardDrive }]
       : []),
   ];
   const handleLogout = () => {

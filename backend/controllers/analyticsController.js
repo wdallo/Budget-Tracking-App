@@ -1,3 +1,7 @@
+const Transaction = require("../models/Transaction.js");
+const Category = require("../models/Category.js");
+const mongoose = require("mongoose");
+
 // GET /api/analytics/income-by-category?period=30
 const getIncomeByCategory = async (req, res) => {
   try {
@@ -50,9 +54,6 @@ const getIncomeByCategory = async (req, res) => {
     res.status(500).json({ error: error.message, stack: error.stack });
   }
 };
-const Transaction = require("../models/Transaction.js");
-const Category = require("../models/Category.js");
-const mongoose = require("mongoose");
 
 // GET /api/analytics/summary?period=30 (period in days)
 const getSummary = async (req, res) => {
