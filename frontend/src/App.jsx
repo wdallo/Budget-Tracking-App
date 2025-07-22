@@ -1,7 +1,9 @@
 import React from "react";
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { FinanceProvider } from "./contexts/FinanceContext";
+
 import Layout from "./components/Layout";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -13,6 +15,11 @@ import Budgets from "./pages/Budgets";
 import Analytics from "./pages/Analytics";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PageNotFound from "./pages/PageNotFound";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AccessDenied from "./pages/admin/AccessDenied";
+import { AdminProvider } from "./contexts/AdminContext";
+import AdminUsers from "./pages/admin/Users";
 
 function App() {
   return (
@@ -76,7 +83,36 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              {/*Admin routes */}
 
+              <Route path="/access-denied" element={<AccessDenied />} />
+
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <AdminProvider>
+                    <AdminProtectedRoute>
+                      <Layout>
+                        <AdminDashboard />
+                      </Layout>
+                    </AdminProtectedRoute>
+                  </AdminProvider>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <AdminProvider>
+                    <AdminProtectedRoute>
+                      <Layout>
+                        <AdminUsers />
+                      </Layout>
+                    </AdminProtectedRoute>
+                  </AdminProvider>
+                }
+              />
+
+              {/* Error Handling */}
               <Route path="*" element={<PageNotFound />} />
             </Routes>
           </div>
