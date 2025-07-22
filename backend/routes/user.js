@@ -5,6 +5,9 @@ const {
   register,
   login,
   verify,
+  updateUser,
+  deleteUser,
+  banUser,
 } = require("../controllers/userController");
 const {
   requireAuth,
@@ -18,8 +21,11 @@ router.post("/login", login);
 /// authorization
 router.get("/verify", verify);
 
-// admin only
+// admin only [ user controls ]
 router.get("/admin/users/count", requireAuth, requireAdmin, getUserCount);
 router.get("/admin/users", requireAuth, requireAdmin, getUsers);
+router.put("/admin/users/:id", requireAuth, requireAdmin, updateUser);
+router.put("/admin/users/ban/:id", requireAuth, requireAdmin, banUser);
+router.delete("/admin/users/:id", requireAuth, requireAdmin, deleteUser);
 
 module.exports = router;

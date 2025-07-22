@@ -1,8 +1,12 @@
 import React, { useState } from "react";
+
 import PopAlert from "../components/PopAlert";
+
 import { useFinance } from "../contexts/FinanceContext";
+
 import { Plus, Target, AlertCircle, Trash2, Edit2 } from "lucide-react";
 import { format, isAfter, isBefore, parseISO } from "date-fns";
+import { SuccessAlert, ErrorAlert } from "../components/Alerts";
 
 const Budgets = () => {
   const {
@@ -32,6 +36,11 @@ const Budgets = () => {
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [optimisticPrev, setOptimisticPrev] = useState(null);
 
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
   const handleDelete = async (id) => {
     setPendingDeleteId(id);
     setPopAlertOpen(true);
@@ -46,10 +55,21 @@ const Budgets = () => {
       setBudgets(newBudgets);
       setPopAlertOpen(false);
       try {
-        await deleteBudget(pendingDeleteId);
+        const result = await deleteBudget(pendingDeleteId);
+        if (result && result.success) {
+          setDeleteSuccess(true);
+          setDeleteError("");
+        } else {
+          setBudgets(prevBudgets);
+          setDeleteError(
+            result?.error || "Failed to delete budget. Please refresh."
+          );
+          setDeleteSuccess(false);
+        }
       } catch {
         setBudgets(prevBudgets);
-        alert("Failed to delete budget. Please refresh.");
+        setDeleteError("Failed to delete budget. Please refresh.");
+        setDeleteSuccess(false);
       }
       setPendingDeleteId(null);
     }
@@ -83,10 +103,14 @@ const Budgets = () => {
         start_date: new Date().toISOString().split("T")[0],
         end_date: "",
       });
-
+      setSuccess(editingBudget ? "update" : "create");
+      setError("");
       if (editingBudget) {
         await fetchBudgets();
       }
+    } else {
+      setError(result.error || "Failed to save budget.");
+      setSuccess(false);
     }
   };
 
@@ -118,6 +142,28 @@ const Budgets = () => {
 
   return (
     <div className="space-y-6">
+      {success === "create" && (
+        <SuccessAlert
+          message="Budget created successfully!"
+          onClose={() => setSuccess(false)}
+        />
+      )}
+      {success === "update" && (
+        <SuccessAlert
+          message="Budget updated successfully!"
+          onClose={() => setSuccess(false)}
+        />
+      )}
+      {error && <ErrorAlert message={error} onClose={() => setError("")} />}
+      {deleteSuccess && (
+        <SuccessAlert
+          message="Budget deleted successfully!"
+          onClose={() => setDeleteSuccess(false)}
+        />
+      )}
+      {deleteError && (
+        <ErrorAlert message={deleteError} onClose={() => setDeleteError("")} />
+      )}
       {/* Header */}
       <div className="md:flex md:items-center md:justify-between">
         <div className="flex-1 min-w-0">

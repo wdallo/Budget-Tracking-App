@@ -28,6 +28,88 @@ const getUserCount = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+// Update user by id
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Only admin or the user themselves can update
+    if (!req.user || (req.user.role !== "admin" && req.user.userId !== id)) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    const { firstName, lastName, email } = req.body;
+    const updateFields = {};
+    if (firstName) updateFields.firstName = firstName;
+    if (lastName) updateFields.lastName = lastName;
+    if (email) {
+      const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
+      if (!emailRegex.test(email.trim())) {
+        return res.status(400).json({ error: "Invalid email format" });
+      }
+      updateFields.email = email.trim();
+    }
+    const user = await User.findByIdAndUpdate(id, updateFields, {
+      new: true,
+    }).select("-password");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json({
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+// Delete user by id
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Only admin can delete
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    const user = await User.findByIdAndDelete(id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+const banUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Only admin can toggle ban status
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    if (user.role === "admin") {
+      return res.status(400).json({ error: "Cannot ban/unban an admin" });
+    }
+
+    user.status = user.status === "banned" ? "active" : "banned";
+    await user.save();
+    res.json({
+      message: `User ${
+        user.status === "banned" ? "banned" : "unbanned"
+      } successfully`,
+      status: user.status,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 // Register a new user
 const register = async (req, res) => {
   try {
@@ -53,6 +135,7 @@ const register = async (req, res) => {
       email: email.trim(),
       password: hashedPassword,
       role: "user", // default role
+      status: "active",
     });
     await user.save();
     const jwtSecret = process.env.JWT_SECRET;
@@ -71,6 +154,7 @@ const register = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         role: user.role,
+        status: "active",
       },
     });
   } catch (error) {
@@ -104,7 +188,12 @@ const login = async (req, res) => {
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) throw new Error("JWT_SECRET not set");
     const token = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
+      {
+        userId: user._id,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+      },
       jwtSecret,
       { expiresIn: "365d" }
     );
@@ -116,6 +205,7 @@ const login = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         role: user.role,
+        status: user.status,
       },
     });
   } catch (error) {
@@ -144,6 +234,7 @@ const verify = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         role: user.role,
+        status: user.status,
       },
     });
   } catch (err) {
@@ -151,4 +242,13 @@ const verify = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getUserCount, register, login, verify };
+module.exports = {
+  getUsers,
+  getUserCount,
+  updateUser,
+  deleteUser,
+  banUser,
+  register,
+  login,
+  verify,
+};
