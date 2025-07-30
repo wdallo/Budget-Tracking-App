@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAdmin } from "../../contexts/AdminContext";
 import PopAlert from "../../components/PopAlert";
-import { Search, Edit2, Trash2 } from "lucide-react";
+import { Search, Edit2, Trash2, Ban, ShieldCheck } from "lucide-react";
 import { SuccessAlert, ErrorAlert } from "../../components/Alerts";
 const AdminUsers = () => {
   const {
@@ -233,7 +233,9 @@ const AdminUsers = () => {
                         className="p-1 text-gray-400 hover:text-green-600"
                         title="Unban user"
                       >
-                        <span className="text-xs font-bold">Unban</span>
+                        <span className="text-xs font-bold">
+                          <ShieldCheck className="h-4 w-4" />
+                        </span>
                       </button>
                     ) : (
                       <button
@@ -241,7 +243,9 @@ const AdminUsers = () => {
                         className="p-1 text-gray-400 hover:text-yellow-600"
                         title="Ban user"
                       >
-                        <span className="text-xs font-bold">Ban</span>
+                        <span className="text-xs font-bold">
+                          <Ban className="h-4 w-4" />
+                        </span>
                       </button>
                     )}
                   </div>
