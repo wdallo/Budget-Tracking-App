@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import {
   Home,
@@ -29,8 +29,10 @@ const Layout = ({ children }) => {
       ? [{ name: "Admin Dashboard", href: "/admin/dashboard", icon: HardDrive }]
       : []),
   ];
-  const handleLogout = () => {
-    logout();
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
   };
 
   return (
